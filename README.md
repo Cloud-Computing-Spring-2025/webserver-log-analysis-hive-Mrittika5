@@ -40,12 +40,15 @@ LOCATION '/user/hive/warehouse/web_logs/';
 This table is stored in HDFS under `/user/hive/warehouse/web_logs/`.
 
 ## **Step 3: Load Data into HDFS**
-1. Ensure the web server log file (`web_server_logs.csv`) is available on your local machine. or you can upload it in hues file manager
-2. Upload it to HDFS using the command line (if using Docker, run this inside the container):
-   ```sh
-   hdfs dfs -mkdir -p /user/hive/warehouse/web_logs
-   hdfs dfs -put web_server_logs.csv /user/hive/warehouse/web_logs/
-   ```
+
+1.  Go to "File Browser" (from the left-side menu).
+Navigate to the  HDFS directory:
+ /user/hive/warehouse/web_logs/
+
+2. Upload the CSV File
+Click the "Upload" button in the File Browser.
+Select your web_server_logs.csv file from your local machine.
+
 3. Load data into Hive:
    ```sql
    LOAD DATA INPATH '/user/hive/warehouse/web_logs/web_server_logs.csv' INTO TABLE web_logs_table;
@@ -99,7 +102,7 @@ ORDER BY time_minute;
 
 ## **Step 5: Implement Partitioning**
 ```sql
-CREATE TABLE web_logs_partitioned (
+CREATE TABLE web_logs_partition (
     ip STRING,
     timest STRING,
     url STRING,
@@ -113,7 +116,12 @@ STORED AS TEXTFILE;
 
 ### **Insert Data into Partitioned Table**
 ```sql
-INSERT OVERWRITE TABLE web_logs_partitioned PARTITION (status)
+SET hive.exec.dynamic.partition.mode = nonstrict;
+
+```
+```sql
+
+INSERT OVERWRITE TABLE web_logs_partition PARTITION (status)
 SELECT ip, timest, url, user_agent, status FROM web_logs_table;
 ```
 
